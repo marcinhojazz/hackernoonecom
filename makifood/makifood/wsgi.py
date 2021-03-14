@@ -1,5 +1,5 @@
 """
-WSGI config for hackernoonecom project.
+WSGI config for makifood project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 
@@ -11,6 +11,6 @@ import os
 
 from django.core.wsgi import get_wsgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'hackernoonecom.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'makifood.settings')
 
 application = get_wsgi_application()

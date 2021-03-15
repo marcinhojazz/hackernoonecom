@@ -1,25 +1,100 @@
 from django.shortcuts import render
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.core.files.storage import FileSystemStorage
+from datetime import datetime, timedelta
+from markdownx.utils import markdownify
+from .models import *
+from .forms import *
+
+
+
 
 # Create your views here.
 def home(request):
-    context = {}
+    recipes = Recipe.objects.all()
+    context = {
+        'recipes': recipes,
+    }
     return render(request, 'app/index.html', context)
 
 def detail(request, id):
-    context = {}
+    recipe = get_object_or_404(Recipe, id=id)
+    recipe.ingreients = markdownify(recipe.ingredients)
+    recipe.directions = markdownify(recipe.directions)
+
+    context = {
+        'recipe': recipe,
+    }
     return render(request, 'app/detail.html', context)
 
+@login_required
 def create(request):
     context = {}
+    if request.method == 'GET':
+        form = RecipeForm()
+        context['form'] = RecipeForm()
+        return render(request, 'app/create.html', context)
+    elif request.method == 'POST' and request.FILES != None:
+        form = RecipeForm(request.POST, request.FILES)
+        if form.is_valid():
+            new = Recipe()
+            user = request.user
+            new.author = user
+            new.name = form['name'].value()
+            new.description = form['description'].value()
+            new.prep = form['prep'].value()
+            new.cook = form['cook'].value()
+            new servings = form['servings'].value()
+            new.ingredients = form['ingredients'].value()
+            new.directions = form['directions'].value()
+            new.notes = form['notes'].value()
+            theimg = request.FILES['image']
+            fs = FileSystemStorage()
+            filename = fs.save(theimg.name, theimg)
+            file_url = fs.url(filename)
+            new.save()
+            return redirect('home')
+        else:
+            form = RecipeForm()
+            context['form'] = RecipeForm()
+            return render(request, 'app/create.html', context)
     return render(request, 'app/create.html', context)
-
+            
+@login_required
 def update(request, id):
-    context = {}
+    recipe = get_object_or_404(Recipe, id=id)
+    context = {
+        'recipe': recipe
+    }
+    if request.method == 'GET':
+        form = RecipeForm(isinstance=recipe)
+        context['form'] = form
+        return render(request, 'app/update.html', context)
+    elif request.method == 'POST' and request.FILES != None:
+        form = RecipeForm(request.POST, request.FILES, isinstance=recipe)
+        if form.is_valid():
+            form.save()
+            return redirect('detail', recipe.id)
+        else:
+            form = RecipeForm(instance=recipe)
+            context['form'] = form
+            return render(Request, 'app/update.html', context)
+        return render(Request, 'app/update.html', context)
     return render(request, 'app/update.html', context)
 
+@login_required
 def delete(request, id):
-    context = {}
-    return render(request, 'app/delete.html', context)
+    recipe = get_object_or404(Recipe, id=id)
+    if not request.user == recipe.author:
+        return redirect('detail', recipe.id)
+    else:
+        name = recipe.name
+        recipe.delete()
+        context = {
+            'name':name
+        }
+        return render(request, 'app/delete.html', context)
 
 def load(request):
     # 🧀🥞🥪🌮🥗

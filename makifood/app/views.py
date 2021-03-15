@@ -45,7 +45,7 @@ def create(request):
             new.description = form['description'].value()
             new.prep = form['prep'].value()
             new.cook = form['cook'].value()
-            new servings = form['servings'].value()
+            new.servings = form['servings'].value()
             new.ingredients = form['ingredients'].value()
             new.directions = form['directions'].value()
             new.notes = form['notes'].value()

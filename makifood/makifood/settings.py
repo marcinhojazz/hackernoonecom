@@ -25,7 +25,7 @@ SECRET_KEY = 'do0g!w$g@dw_qvi=m^2i@dpwk7x+#i5q6jb3cibo32j@h44cw$'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['[makifood-app].herokuapp.com']
 
 
 # Application definition
